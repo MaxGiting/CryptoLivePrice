@@ -1,11 +1,23 @@
+var fs = require('fs')
+var path = require('path')
 var electron = require('electron')
 var request = require('request');
 var app = electron.app
 var Tray = electron.Tray
 var currencyFormatter = require('currency-formatter');
+var BrowserWindow = electron.BrowserWindow
+var Positioner = require('electron-positioner')
 
 var iconPath = 'IconTemplate.png'
 var tray;
+var window;
+var showOnAllWorkspaces = true
+var alwaysOnTop = true
+index = 'file://' + path.join(app.getAppPath(), 'index.html')
+var supportsTrayHighlightState = false;
+
+var windowPosition = (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter';
+
 
 if (app.isReady()) appReady()
 else app.on('ready', appReady)
@@ -14,6 +26,15 @@ function appReady(){
     app.dock.hide();
     tray = new Tray(iconPath);
 
+    try {
+        tray.setHighlightMode('never')
+        supportsTrayHighlightState = true
+    } catch (e) { 
+        console.log(e);
+    };
+
+    tray.on('click', clicked)
+    tray.on('double-click', clicked)
     setInterval(getValue, 1000); 
 }
 
@@ -47,3 +68,70 @@ function standardiseInput(input) {
     return currencyFormatter.format(input, { code: 'GBP' });
 }
 
+
+
+function showWindow(trayPos) {
+    if (supportsTrayHighlightState) tray.setHighlightMode('always')
+    if (!window) {
+        createWindow()
+    }
+
+    // Default the window to the right if `trayPos` bounds are undefined or null.
+    var noBoundsPosition = null
+    if ((trayPos === undefined || trayPos.x === 0)) {
+        noBoundsPosition = (process.platform === 'win32') ? 'bottomRight' : 'topRight'
+    }
+
+    var position = positioner.calculate(noBoundsPosition || windowPosition, trayPos)
+
+    var x = position.x
+    var y = position.y
+
+    window.setPosition(x, y)
+    window.show()
+    return
+}
+
+
+function createWindow() {
+    var defaults = {
+        show: false,
+        frame: false
+    }
+
+
+    window = new BrowserWindow(defaults)
+
+    positioner = new Positioner(window)
+
+    window.on('blur', function () {
+        alwaysOnTop ? '' : hideWindow()
+    })
+
+    if (showOnAllWorkspaces !== false) {
+        window.setVisibleOnAllWorkspaces(true)
+    }
+
+    window.on('close', windowClear)
+    window.loadURL(index)
+}
+
+function windowClear() {
+    delete window
+}
+
+function clicked(e, bounds) {
+
+    if (e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) return hideWindow()
+    if (window && window.isVisible()) return hideWindow()
+    cachedBounds = bounds || cachedBounds
+    showWindow(cachedBounds)
+
+}
+
+
+function hideWindow() {
+    if (supportsTrayHighlightState) tray.setHighlightMode('never')
+    if (!window) return
+    window.hide()
+}
