@@ -22,6 +22,9 @@ var windowPosition = (process.platform === 'win32') ? 'trayBottomCenter' : 'tray
 if (app.isReady()) appReady()
 else app.on('ready', appReady)
 
+/**
+ * Setup the menubar and start calling the api when ready
+ */
 function appReady(){
     app.dock.hide();
     tray = new Tray(iconPath);
@@ -38,6 +41,11 @@ function appReady(){
     setInterval(getValue, 1000); 
 }
 
+/**
+ * Set the menubar price value
+ * 
+ * @param {string} value 
+ */
 function setTitle(value) {
     value = standardiseInput(value)
     tray.setTitle(value);
@@ -60,6 +68,11 @@ getValue = function getValue() {
         });
 }
 
+/**
+ * Convert api input to a number
+ * 
+ * @param {string} input 
+ */
 function standardiseInput(input) {
     //remove any commas
     input = input.replace(/\,/g, "");
@@ -68,8 +81,11 @@ function standardiseInput(input) {
     return currencyFormatter.format(input, { code: 'GBP' });
 }
 
-
-
+/**
+ * 
+ * 
+ * @param {object} trayPos 
+ */
 function showWindow(trayPos) {
     if (supportsTrayHighlightState) tray.setHighlightMode('always')
     if (!window) {
@@ -92,7 +108,9 @@ function showWindow(trayPos) {
     return
 }
 
-
+/**
+ * Create the apps settings window
+ */
 function createWindow() {
     var defaults = {
         show: false,
@@ -116,12 +134,20 @@ function createWindow() {
     window.loadURL(index)
 }
 
+/**
+ * Delete the apps settings window
+ */
 function windowClear() {
     delete window
 }
 
+/**
+ * When the menubar is clicked show the settings window
+ * 
+ * @param {object} e 
+ * @param {object} bounds 
+ */
 function clicked(e, bounds) {
-
     if (e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) return hideWindow()
     if (window && window.isVisible()) return hideWindow()
     cachedBounds = bounds || cachedBounds
@@ -129,7 +155,9 @@ function clicked(e, bounds) {
 
 }
 
-
+/**
+ * Hide the apps settings window
+ */
 function hideWindow() {
     if (supportsTrayHighlightState) tray.setHighlightMode('never')
     if (!window) return
