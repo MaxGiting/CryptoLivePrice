@@ -1,6 +1,20 @@
 <html>
 <head>
 <title>Bitcoin Live Price App</title>
+<script>
+
+  var ipcRenderer = require('electron').ipcRenderer;
+
+  ipcRenderer.on('currencies', function (event, currencies) {
+    currencies.forEach(function(element) {
+      // console.log(element);
+    });
+    console.log(currencies)
+    
+  });
+
+  
+</script>
 </head>
 <body>
   hello world

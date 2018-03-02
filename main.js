@@ -105,6 +105,10 @@ function showWindow(trayPos) {
 
     window.setPosition(x, y)
     window.show()
+    window.webContents.openDevTools();
+    window.webContents.on('did-finish-load', () => {
+        window.webContents.send('currencies', currencyFormatter.currencies);        
+    })
     return
 }
 
