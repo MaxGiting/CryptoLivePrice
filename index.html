@@ -6,15 +6,12 @@
   var ipcRenderer = require('electron').ipcRenderer;
 
   ipcRenderer.on('currencies', function (event, currencies) {
-    console.log(currencies);
-            currencies.forEach(function (element, key) {
-              var x = document.getElementById("exchangeCurrency");
-              var option = document.createElement("option");
-              option.text = element.code;
-              x.add(option);
-            });
-
-    event.sender.send("start-script", args);
+    currencies.forEach(function (element, key) {
+      var x = document.getElementById("exchangeCurrency");
+      var option = document.createElement("option");
+      option.text = element.code;
+      x.add(option);
+    });
   });
 
   ipcRenderer.on('supported', function (event, supported) {

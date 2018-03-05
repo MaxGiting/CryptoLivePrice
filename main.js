@@ -22,7 +22,7 @@ var alwaysOnTop = true
 index = 'file://' + path.join(app.getAppPath(), 'index.html')
 var supportsTrayHighlightState = false;
 var supportedExchangeRateCurrencies;
-var choosenCurrency;
+var choosenCurrency = 'USD';
 
 var windowPosition = (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter';
 
