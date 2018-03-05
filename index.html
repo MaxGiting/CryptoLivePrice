@@ -6,17 +6,29 @@
   var ipcRenderer = require('electron').ipcRenderer;
 
   ipcRenderer.on('currencies', function (event, currencies) {
-    currencies.forEach(function(element) {
-      // console.log(element);
-    });
-    console.log(currencies)
-    
+    console.log(currencies);
+            currencies.forEach(function (element, key) {
+              var x = document.getElementById("exchangeCurrency");
+              var option = document.createElement("option");
+              option.text = element.code;
+              x.add(option);
+            });
+
+    event.sender.send("start-script", args);
   });
 
+  ipcRenderer.on('supported', function (event, supported) {
+    console.log(Object.keys(supported).length)
+  });
+
+  function updateSelectedCurrency() {
+    ipcRenderer.send('changedCurrency', document.getElementById("exchangeCurrency").value)  
+  }
   
 </script>
 </head>
 <body>
-  hello world
+<select id="exchangeCurrency" onchange="updateSelectedCurrency()">
+</select>
 </body>
 </html>

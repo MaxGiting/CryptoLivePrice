@@ -7,6 +7,12 @@ var Tray = electron.Tray
 var currencyFormatter = require('currency-formatter');
 var BrowserWindow = electron.BrowserWindow
 var Positioner = require('electron-positioner')
+var ipcMain= require('electron');
+
+electron.ipcMain.on('changedCurrency', (event, currency) => {
+    console.log('Currency changed to '+currency)
+    choosenCurrency = currency;
+})
 
 var iconPath = 'IconTemplate.png'
 var tray;
@@ -15,6 +21,8 @@ var showOnAllWorkspaces = true
 var alwaysOnTop = true
 index = 'file://' + path.join(app.getAppPath(), 'index.html')
 var supportsTrayHighlightState = false;
+var supportedExchangeRateCurrencies;
+var choosenCurrency;
 
 var windowPosition = (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter';
 
@@ -38,7 +46,21 @@ function appReady(){
 
     tray.on('click', clicked)
     tray.on('double-click', clicked)
-    setInterval(getValue, 1000); 
+    setInterval(getValue, 1000);
+    getSupportedExchangeRateCurrencies();
+}
+
+function getSupportedExchangeRateCurrencies() {
+    request(
+        {
+            url: 'https://free.currencyconverterapi.com/api/v5/currencies',
+            json: true
+        },
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                supportedExchangeRateCurrencies = body;
+            }
+        });
 }
 
 /**
@@ -107,7 +129,15 @@ function showWindow(trayPos) {
     window.show()
     window.webContents.openDevTools();
     window.webContents.on('did-finish-load', () => {
-        window.webContents.send('currencies', currencyFormatter.currencies);        
+        currencies = currencyFormatter.currencies;
+        currencies.forEach(function(element, key) {
+            if (!supportedExchangeRateCurrencies.results.hasOwnProperty(element.code)) {
+                // delete currencies[key]
+                currencies.splice(key, 1);
+            }
+        });
+        window.webContents.send('currencies', currencies);        
+        window.webContents.send('supported', supportedExchangeRateCurrencies);        
     })
     return
 }
@@ -167,3 +197,5 @@ function hideWindow() {
     if (!window) return
     window.hide()
 }
+
+
