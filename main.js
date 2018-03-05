@@ -47,7 +47,7 @@ function appReady(){
 
     tray.on('click', clicked)
     tray.on('double-click', clicked)
-    setInterval(getValue, 1000);
+    setInterval(getValue, 10000);
     getConversionRate();
     setInterval(getConversionRate, 60000);
     getSupportedExchangeRateCurrencies();
