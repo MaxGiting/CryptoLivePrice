@@ -9,7 +9,7 @@ var BrowserWindow = electron.BrowserWindow
 var Positioner = require('electron-positioner')
 var ipcMain= require('electron');
 
-electron.ipcMain.on('changedselectedFiatCurrency', (event, currency) => {
+electron.ipcMain.on('changedFiatCurrency', (event, currency) => {
     console.log('Currency changed to '+currency)
     selectedFiatCurrency = currency;
 })
