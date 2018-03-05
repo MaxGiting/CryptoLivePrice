@@ -5,11 +5,16 @@
 
   var ipcRenderer = require('electron').ipcRenderer;
 
-  ipcRenderer.on('currencies', function (event, currencies) {
-    currencies.forEach(function (element, key) {
-      var x = document.getElementById("exchangeCurrency");
+  ipcRenderer.on('currencies', function (event, array) {
+    array[0].forEach(function (element, key) {
+      var x = document.getElementById("fiatCurrency");
       var option = document.createElement("option");
       option.text = element.code;
+
+      if (element.code == array[1]) {
+        option.selected = true;
+      }
+
       x.add(option);
     });
   });
@@ -18,14 +23,14 @@
     console.log(Object.keys(supported).length)
   });
 
-  function updateSelectedCurrency() {
-    ipcRenderer.send('changedCurrency', document.getElementById("exchangeCurrency").value)  
+  function updateSelectedFiatCurrency() {
+    ipcRenderer.send('changedFiatCurrency', document.getElementById("fiatCurrency").value)  
   }
   
 </script>
 </head>
 <body>
-<select id="exchangeCurrency" onchange="updateSelectedCurrency()">
+<select id="fiatCurrency" onchange="updateSelectedFiatCurrency()">
 </select>
 </body>
 </html>

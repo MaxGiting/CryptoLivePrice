@@ -9,9 +9,9 @@ var BrowserWindow = electron.BrowserWindow
 var Positioner = require('electron-positioner')
 var ipcMain= require('electron');
 
-electron.ipcMain.on('changedCurrency', (event, currency) => {
+electron.ipcMain.on('changedselectedFiatCurrency', (event, currency) => {
     console.log('Currency changed to '+currency)
-    choosenCurrency = currency;
+    selectedFiatCurrency = currency;
 })
 
 var iconPath = 'IconTemplate.png'
@@ -22,7 +22,7 @@ var alwaysOnTop = true
 index = 'file://' + path.join(app.getAppPath(), 'index.html')
 var supportsTrayHighlightState = false;
 var supportedExchangeRateCurrencies;
-var choosenCurrency = 'USD';
+var selectedFiatCurrency = 'USD';
 
 var windowPosition = (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter';
 
@@ -136,7 +136,7 @@ function showWindow(trayPos) {
                 currencies.splice(key, 1);
             }
         });
-        window.webContents.send('currencies', currencies);        
+        window.webContents.send('currencies', [currencies, selectedFiatCurrency]);        
         window.webContents.send('supported', supportedExchangeRateCurrencies);        
     })
     return
