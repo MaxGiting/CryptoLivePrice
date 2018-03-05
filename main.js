@@ -12,6 +12,7 @@ var ipcMain= require('electron');
 electron.ipcMain.on('changedFiatCurrency', (event, currency) => {
     console.log('Currency changed to '+currency)
     selectedFiatCurrency = currency;
+    getConversionRate();    
 })
 
 var iconPath = 'IconTemplate.png'
@@ -47,7 +48,23 @@ function appReady(){
     tray.on('click', clicked)
     tray.on('double-click', clicked)
     setInterval(getValue, 1000);
+    getConversionRate();
+    setInterval(getConversionRate, 60000);
     getSupportedExchangeRateCurrencies();
+}
+
+function getConversionRate() {
+    request(
+        {
+            url: 'https://free.currencyconverterapi.com/api/v5/convert?q=USD_'+selectedFiatCurrency+'&compact=ultra',
+            json: true
+        },
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                conversionRate = body['USD_' + selectedFiatCurrency];
+                console.log('Conversion Rate: '+conversionRate)
+            }
+        });
 }
 
 function getSupportedExchangeRateCurrencies() {
@@ -85,7 +102,7 @@ getValue = function getValue() {
         },
         function (error, response, body) {
             if (!error && response.statusCode === 200) {       
-                setTitle(body['bpi']['GBP']['rate']); 
+                setTitle(body['bpi']['USD']['rate']); 
             }
         });
 }
@@ -99,8 +116,11 @@ function standardiseInput(input) {
     //remove any commas
     input = input.replace(/\,/g, "");
     input = Number(input);
-    
-    return currencyFormatter.format(input, { code: 'GBP' });
+
+    // Times by the conversion rate
+    input = input*conversionRate;
+
+    return currencyFormatter.format(input, { code: selectedFiatCurrency });
 }
 
 /**
